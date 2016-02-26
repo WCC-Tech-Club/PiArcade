@@ -29,9 +29,16 @@ speed = 500
 position = [int(size[0] / 2), int(size[1] / 2)]
 deltaTime = 1 / framerate
 
-# Joystick init
+# Joystick initialization
 pygame.joystick.init()
-hasJoystick = pygame.joystick.get_count() > 0
+hasJoystick = False
+joystick = None
+
+if pygame.joystick.get_count() > 0:
+    joystick = pygame.joystick.Joystick(0)
+    hasJoystick = joystick.get_numhats() > 0
+
+print("Has Joystick: " + str(hasJoystick))
 
 # -------- Main Program Loop -----------
 while running:
@@ -49,10 +56,9 @@ while running:
         # Use joystick if one exists
         joystick = pygame.joystick.Joystick(0)
 
-        # It is unknown what axis will be x and what will be y
-        # Experiment and swap them out once we have a joystick to test with
-        position[0] += joystick.get_axis(0) * speed * deltaTime
-        position[1] += joystick.get_axis(1) * speed * deltaTime
+        hatPosition = joystick.get_hat(0)
+        position[0] += hatPosition[0] * speed * deltaTime
+        position[1] += -hatPosition[1] * speed * deltaTime
     else:
         # Use keyboard if joystick does not exist
         if pressedKeys[pygame.K_a] or pressedKeys[pygame.K_LEFT]:
@@ -81,7 +87,7 @@ while running:
         position[1] = size[1]
 
     # Debug position and delta time
-    print(str(position[0]) + " : " + str(position[1]) + " : " + str(deltaTime));
+    # print(str(position[0]) + " : " + str(position[1]) + " : " + str(deltaTime));
 
     # --- Screen-clearing code goes here
  
