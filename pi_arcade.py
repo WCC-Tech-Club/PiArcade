@@ -1,3 +1,5 @@
+import math
+
 import pygame
 import pygame.key
 import pygame.draw
@@ -26,7 +28,7 @@ clock = pygame.time.Clock()
 # Used to test key input, joystick input, and framerate independence
 framerate = 60
 speed = 500
-position = [int(size[0] / 2), int(size[1] / 2)]
+position = [size[0] / 2, size[1] / 2]
 deltaTime = 1 / framerate
 
 # Joystick initialization
@@ -49,29 +51,43 @@ while running:
 
     # --- Game logic should go here
 
-    # Key Input
-    pressedKeys = pygame.key.get_pressed()
+    # Input
+    movement = [0.0, 0.0]
 
     if hasJoystick:
         # Use joystick if one exists
-        joystick = pygame.joystick.Joystick(0)
+        hat = joystick.get_hat(0)
+        movement[0] = hat[0]
+        movement[1] = -hat[1]
 
-        hatPosition = joystick.get_hat(0)
-        position[0] += hatPosition[0] * speed * deltaTime
-        position[1] += -hatPosition[1] * speed * deltaTime
     else:
         # Use keyboard if joystick does not exist
+        pressedKeys = pygame.key.get_pressed()
+
+        # Input logic for keys designed to zero out movement when
+        # both keys on axis are pressed (up/down or left/right)
         if pressedKeys[pygame.K_a] or pressedKeys[pygame.K_LEFT]:
-            position[0] -= int(speed * deltaTime)
+            movement[0] -= 1
 
         if pressedKeys[pygame.K_d] or pressedKeys[pygame.K_RIGHT]:
-            position[0] += int(speed * deltaTime)
+            movement[0] += 1
 
         if pressedKeys[pygame.K_w] or pressedKeys[pygame.K_UP]:
-            position[1] -= int(speed * deltaTime)
+            movement[1] -= 1
 
         if pressedKeys[pygame.K_s] or pressedKeys[pygame.K_DOWN]:
-            position[1] += int(speed * deltaTime)
+            movement[1] += 1
+
+    # Normalize movement
+    sqMagnitude = (movement[0] * movement[0]) + (movement[1] * movement[1])
+    if sqMagnitude > 1:
+        magnitude = math.sqrt(sqMagnitude)
+        movement[0] /= magnitude
+        movement[1] /= magnitude
+
+    # Apply movement modified by speed and delta time to position
+    position[0] += movement[0] * speed * deltaTime
+    position[1] += movement[1] * speed * deltaTime
 
     # Clamp position to screen
     if position[0] < 0:
@@ -101,7 +117,7 @@ while running:
     # --- Drawing code should go here
 
     # Draw a circle at position
-    pygame.draw.circle(screen, BLUE, position, 40)
+    pygame.draw.circle(screen, BLUE, [int(position[0]), int(position[1])], 40)
  
     # --- Go ahead and update the screen with what we've drawn.
     pygame.display.flip()
