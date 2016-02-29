@@ -26,6 +26,7 @@ running = True
 clock = pygame.time.Clock()
 
 # Used to test key input, joystick input, and framerate independence
+circleSize = 40
 framerate = 60
 speed = 500
 position = [size[0] / 2, size[1] / 2]
@@ -105,17 +106,17 @@ while running:
     position[1] += movement[1] * speed * deltaTime
 
     # Clamp position to screen
-    if position[0] < 0:
-        position[0] = 0
+    if position[0] < 0 + circleSize:
+        position[0] = 0 + circleSize
 
-    if position[0] > size[0]:
-        position[0] = size[0]
+    if position[0] > size[0] - circleSize:
+        position[0] = size[0] - circleSize
 
-    if position[1] < 0:
-        position[1] = 0
+    if position[1] < 0 + circleSize:
+        position[1] = 0 + circleSize
 
-    if position[1] > size[1]:
-        position[1] = size[1]
+    if position[1] > size[1] - circleSize:
+        position[1] = size[1] - circleSize
 
     # Debug position and delta time
     # print(str(position[0]) + " : " + str(position[1]) + " : " + str(deltaTime));
@@ -132,7 +133,7 @@ while running:
     # --- Drawing code should go here
 
     # Draw a circle at position
-    pygame.draw.circle(screen, BLUE, [int(position[0]), int(position[1])], 40)
+    pygame.draw.circle(screen, BLUE, [int(position[0]), int(position[1])], circleSize)
 
     # --- Go ahead and update the screen with what we've drawn.
     pygame.display.flip()
