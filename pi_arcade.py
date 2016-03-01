@@ -4,24 +4,91 @@ import pygame
 import pygame.key
 import pygame.draw
 
+import spritesheet
+
 # Define some colors
 BLACK = (0, 0, 0)
 WHITE = (255, 255, 255)
 RED = (255, 0, 0)
 GREEN = (0, 255, 0)
 BLUE = (0, 0, 255)
- 
+
+
+# Player class with hard coded sprite
+class Player(pygame.sprite.Sprite):
+
+    def __init__(self):
+        pygame.sprite.Sprite.__init__(self)
+
+        # Hard coded sprite loading
+        self.spriteSheet = spritesheet.SpriteSheet("sphere.png")
+        self.sprites = []
+
+        self.reload_sprites()
+
+        self.image = None
+        self.rect = None
+        self.set_image(0)
+
+    def reload_sprites(self):
+        # Hard coded sprite loading
+        self.sprites = self.spriteSheet.images_at(
+            [
+                (0, 0, 64, 64),
+                (64, 0, 64, 64),
+                (128, 0, 64, 64),
+                (192, 0, 64, 64),
+                (256, 0, 64, 64),
+                (320, 0, 64, 64),
+                (384, 0, 64, 64),
+                (448, 0, 64, 64),
+                (512, 0, 64, 64),
+                (0, 64, 64, 64),
+                (64, 64, 64, 64),
+                (128, 64, 64, 64),
+                (192, 64, 64, 64),
+                (256, 64, 64, 64),
+                (320, 64, 64, 64),
+                (384, 64, 64, 64),
+                (448, 64, 64, 64),
+                (512, 64, 64, 64),
+                (0, 128, 64, 64),
+                (64, 128, 64, 64),
+                (128, 128, 64, 64),
+                (192, 128, 64, 64),
+                (256, 128, 64, 64),
+                (320, 128, 64, 64),
+                (384, 128, 64, 64),
+                (448, 128, 64, 64),
+                (512, 128, 64, 64),
+                (0, 192, 64, 64),
+                (64, 192, 64, 64),
+                (128, 192, 64, 64),
+                (192, 192, 64, 64),
+                (256, 192, 64, 64),
+                (320, 192, 64, 64),
+                (384, 192, 64, 64),
+                (448, 192, 64, 64),
+                (512, 192, 64, 64),
+            ]
+        )
+
+    def set_image(self, sprite_index):
+        self.image = self.sprites[sprite_index]
+        self.rect = self.image.get_rect()
+
+
 pygame.init()
- 
+
 # Set the width and height of the screen [width, height]
 size = (700, 500)
 screen = pygame.display.set_mode(size)
- 
+
 pygame.display.set_caption("My Game")
- 
+
 # Loop until the user clicks the close button.
 running = True
- 
+
 # Used to manage how fast the screen updates
 clock = pygame.time.Clock()
 
@@ -41,7 +108,7 @@ joystick = None
 if pygame.joystick.get_count() > 0:
     joystick = pygame.joystick.Joystick(0)
     joystick.init()
-    hasJoystick = joystick.get_numhats() > 0
+    hasJoystick = joystick.get_numaxes() >= 2
 
 print("Has Joystick: " + str(hasJoystick))
 
