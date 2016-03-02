@@ -91,6 +91,7 @@ pygame.init()
 # Set the width and height of the screen [width, height]
 size = (700, 500)
 screen = pygame.display.set_mode(size)
+background = pygame.image.load("background.jpg").convert()
 
 pygame.display.set_caption("My Game")
 
@@ -206,7 +207,8 @@ while running:
 
     # If you want a background image, replace this clear with blit'ing the
     # background image.
-    screen.fill(WHITE)
+    # screen.fill(WHITE)
+    screen.blit(background, (0, 0))
 
     # --- Drawing code should go here
 
