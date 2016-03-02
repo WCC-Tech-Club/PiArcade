@@ -14,7 +14,7 @@ class SpriteSheet(object):
             self.sheet = pygame.image.load(filename).convert()
         except pygame.error as error:
             print("Unable to load sprite sheet image:", filename)
-            raise SystemExit(error.message)
+            raise SystemExit(error)
 
     # Load a specific image from a specific rectangle
     def image_at(self, rectangle, colorkey = None):

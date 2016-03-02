@@ -3,6 +3,7 @@ import math
 import pygame
 import pygame.key
 import pygame.draw
+import pygame.sprite
 
 import spritesheet
 
@@ -17,18 +18,25 @@ BLUE = (0, 0, 255)
 # Player class with hard coded sprite
 class Player(pygame.sprite.Sprite):
 
-    def __init__(self):
+    def __init__(self, center):
         pygame.sprite.Sprite.__init__(self)
 
         # Hard coded sprite loading
         self.spriteSheet = spritesheet.SpriteSheet("sphere.png")
         self.sprites = []
+        self.animFramerate = 60.0
 
         self.reload_sprites()
 
         self.image = None
         self.rect = None
-        self.set_image(0)
+        self.set_image(0, center)
+
+    def get_anim_framerate(self):
+        return self.animFramerate
+
+    def set_anim_framerate(self, anim_ramerate):
+        self.animFramerate = anim_ramerate
 
     def reload_sprites(self):
         # Hard coded sprite loading
@@ -42,7 +50,6 @@ class Player(pygame.sprite.Sprite):
                 (320, 0, 64, 64),
                 (384, 0, 64, 64),
                 (448, 0, 64, 64),
-                (512, 0, 64, 64),
                 (0, 64, 64, 64),
                 (64, 64, 64, 64),
                 (128, 64, 64, 64),
@@ -51,7 +58,6 @@ class Player(pygame.sprite.Sprite):
                 (320, 64, 64, 64),
                 (384, 64, 64, 64),
                 (448, 64, 64, 64),
-                (512, 64, 64, 64),
                 (0, 128, 64, 64),
                 (64, 128, 64, 64),
                 (128, 128, 64, 64),
@@ -60,7 +66,6 @@ class Player(pygame.sprite.Sprite):
                 (320, 128, 64, 64),
                 (384, 128, 64, 64),
                 (448, 128, 64, 64),
-                (512, 128, 64, 64),
                 (0, 192, 64, 64),
                 (64, 192, 64, 64),
                 (128, 192, 64, 64),
@@ -69,14 +74,17 @@ class Player(pygame.sprite.Sprite):
                 (320, 192, 64, 64),
                 (384, 192, 64, 64),
                 (448, 192, 64, 64),
-                (512, 192, 64, 64),
-            ]
+            ], [255, 0, 255]  # Color Key for alpha
         )
 
-    def set_image(self, sprite_index):
+    def set_image(self, sprite_index, center):
         self.image = self.sprites[sprite_index]
         self.rect = self.image.get_rect()
+        self.rect.center = center
 
+    def update(self, *args):
+        image_index = int((pygame.time.get_ticks() / 1000.0) * self.animFramerate) % 32
+        self.set_image(image_index, args[0])
 
 pygame.init()
 
@@ -93,10 +101,11 @@ running = True
 clock = pygame.time.Clock()
 
 # Used to test key input, joystick input, and framerate independence
-circleSize = 40
+position = [size[0] / 2, size[1] / 2]
+player = pygame.sprite.GroupSingle(Player(position))
+circleRadius = 32
 framerate = 60
 speed = 500
-position = [size[0] / 2, size[1] / 2]
 deltaTime = 1 / framerate
 joyTolerance = 0.2
 
@@ -173,17 +182,19 @@ while running:
     position[1] += movement[1] * speed * deltaTime
 
     # Clamp position to screen
-    if position[0] < 0 + circleSize:
-        position[0] = 0 + circleSize
+    if position[0] < 0 + circleRadius:
+        position[0] = 0 + circleRadius
 
-    if position[0] > size[0] - circleSize:
-        position[0] = size[0] - circleSize
+    if position[0] > size[0] - circleRadius:
+        position[0] = size[0] - circleRadius
 
-    if position[1] < 0 + circleSize:
-        position[1] = 0 + circleSize
+    if position[1] < 0 + circleRadius:
+        position[1] = 0 + circleRadius
 
-    if position[1] > size[1] - circleSize:
-        position[1] = size[1] - circleSize
+    if position[1] > size[1] - circleRadius:
+        position[1] = size[1] - circleRadius
+
+    player.update(position)
 
     # Debug position and delta time
     # print(str(position[0]) + " : " + str(position[1]) + " : " + str(deltaTime));
@@ -200,13 +211,14 @@ while running:
     # --- Drawing code should go here
 
     # Draw a circle at position
-    pygame.draw.circle(screen, BLUE, [int(position[0]), int(position[1])], circleSize)
+    # pygame.draw.circle(screen, BLUE, [int(position[0]), int(position[1])], circleRadius)
+    player.draw(screen)
 
     # --- Go ahead and update the screen with what we've drawn.
     pygame.display.flip()
 
     # --- Limit to 60 frames per second
-    deltaTime = clock.tick_busy_loop(framerate) / 1000
+    deltaTime = clock.tick_busy_loop(framerate) / 1000.0
 
 # Close the window and quit.
 pygame.quit()
