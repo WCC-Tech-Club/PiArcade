@@ -18,13 +18,13 @@ BLUE = (0, 0, 255)
 # Player class with hard coded sprite
 class Player(pygame.sprite.Sprite):
 
-    def __init__(self, center):
+    def __init__(self, center, anim_framerate=60.0):
         pygame.sprite.Sprite.__init__(self)
 
         # Hard coded sprite loading
         self.spriteSheet = spritesheet.SpriteSheet("sphere.png")
         self.sprites = []
-        self.animFramerate = 60.0
+        self.animFramerate = anim_framerate
 
         self.reload_sprites()
 
@@ -35,8 +35,8 @@ class Player(pygame.sprite.Sprite):
     def get_anim_framerate(self):
         return self.animFramerate
 
-    def set_anim_framerate(self, anim_ramerate):
-        self.animFramerate = anim_ramerate
+    def set_anim_framerate(self, anim_framerate):
+        self.animFramerate = anim_framerate
 
     def reload_sprites(self):
         # Hard coded sprite loading
@@ -84,6 +84,11 @@ class Player(pygame.sprite.Sprite):
 
     def update(self, *args):
         image_index = int((pygame.time.get_ticks() / 1000.0) * self.animFramerate) % 32
+
+        # If the animation framerate is negative, this makes the index valid to use
+        if image_index < 0:
+            image_index += 32
+
         self.set_image(image_index, args[0])
 
 pygame.init()
@@ -103,7 +108,7 @@ clock = pygame.time.Clock()
 
 # Used to test key input, joystick input, and framerate independence
 position = [size[0] / 2, size[1] / 2]
-player = pygame.sprite.GroupSingle(Player(position))
+player = pygame.sprite.GroupSingle(Player(position, 60.0))
 circleRadius = 32
 framerate = 60
 speed = 500
@@ -128,6 +133,9 @@ while running:
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             running = False
+        if event.type == pygame.KEYDOWN:
+            if event.key == pygame.K_r:
+                player.sprite.set_anim_framerate(-player.sprite.get_anim_framerate())
 
     # --- Game logic should go here
 
