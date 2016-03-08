@@ -25,6 +25,7 @@ class Player(pygame.sprite.Sprite):
         self.spriteSheet = spritesheet.SpriteSheet("sphere.png")
         self.sprites = []
         self.animFramerate = anim_framerate
+        self.animTime = 0
 
         self.reload_sprites()
 
@@ -83,13 +84,14 @@ class Player(pygame.sprite.Sprite):
         self.rect.center = center
 
     def update(self, *args):
-        image_index = int((pygame.time.get_ticks() / 1000.0) * self.animFramerate) % 32
+        self.animTime += self.animFramerate * args[0]
+        image_index = int(self.animTime) % 32
 
-        # If the animation framerate is negative, this makes the index valid to use
+        # If the animation time is negative, this makes the index valid to use
         if image_index < 0:
             image_index += 32
 
-        self.set_image(image_index, args[0])
+        self.set_image(image_index, args[1])
 
 pygame.init()
 
@@ -136,6 +138,10 @@ while running:
         if event.type == pygame.KEYDOWN:
             if event.key == pygame.K_r:
                 player.sprite.set_anim_framerate(-player.sprite.get_anim_framerate())
+            if event.key == pygame.K_PAGEUP:
+                player.sprite.set_anim_framerate(player.sprite.get_anim_framerate() + 5)
+            if event.key == pygame.K_PAGEDOWN:
+                player.sprite.set_anim_framerate(player.sprite.get_anim_framerate() - 5)
 
     # --- Game logic should go here
 
@@ -203,7 +209,7 @@ while running:
     if position[1] > size[1] - circleRadius:
         position[1] = size[1] - circleRadius
 
-    player.update(position)
+    player.update(deltaTime, position)
 
     # Debug position and delta time
     # print(str(position[0]) + " : " + str(position[1]) + " : " + str(deltaTime));
