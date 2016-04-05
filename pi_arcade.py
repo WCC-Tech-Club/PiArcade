@@ -22,7 +22,9 @@ class Player(pygame.sprite.Sprite):
         pygame.sprite.Sprite.__init__(self)
 
         # Hard coded sprite loading
-        self.spriteSheet = spritesheet.SpriteSheet("sphere.png")
+        self.spriteSheet = spritesheet.SpriteSheet("paper_animation.png")
+        self.spriteCount = 0;
+
         self.sprites = []
         self.animFramerate = anim_framerate
         self.animTime = 0
@@ -41,16 +43,65 @@ class Player(pygame.sprite.Sprite):
 
     def reload_sprites(self):
         # Hard coded sprite loading
+        # Spinning ball
+        # self.sprites = self.spriteSheet.images_at(
+        #     [
+        #         (0, 0, 64, 64),
+        #         (64, 0, 64, 64),
+        #         (128, 0, 64, 64),
+        #         (192, 0, 64, 64),
+        #         (256, 0, 64, 64),
+        #         (320, 0, 64, 64),
+        #         (384, 0, 64, 64),
+        #         (448, 0, 64, 64),
+        #         (0, 64, 64, 64),
+        #         (64, 64, 64, 64),
+        #         (128, 64, 64, 64),
+        #         (192, 64, 64, 64),
+        #         (256, 64, 64, 64),
+        #         (320, 64, 64, 64),
+        #         (384, 64, 64, 64),
+        #         (448, 64, 64, 64),
+        #         (0, 128, 64, 64),
+        #         (64, 128, 64, 64),
+        #         (128, 128, 64, 64),
+        #         (192, 128, 64, 64),
+        #         (256, 128, 64, 64),
+        #         (320, 128, 64, 64),
+        #         (384, 128, 64, 64),
+        #         (448, 128, 64, 64),
+        #         (0, 192, 64, 64),
+        #         (64, 192, 64, 64),
+        #         (128, 192, 64, 64),
+        #         (192, 192, 64, 64),
+        #         (256, 192, 64, 64),
+        #         (320, 192, 64, 64),
+        #         (384, 192, 64, 64),
+        #         (448, 192, 64, 64),
+        #     ], [255, 0, 255]  # Color Key for alpha
+        # )
+        # self.spriteCount = 32
+
+        # Spinning paper
+        # self.sprites = self.spriteSheet.images_at(
+        #     [
+        #         (0, 0, 64, 64),
+        #         (64, 0, 64, 64),
+        #         (128, 0, 64, 64),
+        #         (192, 0, 64, 64),
+        #         (256, 0, 64, 64),
+        #         (320, 0, 64, 64),
+        #         (384, 0, 64, 64),
+        #         (448, 0, 64, 64),
+        #         (512, 0, 64, 64),
+        #         (576, 0, 64, 64),
+        #     ], [255, 0, 255]  # Color Key for alpha
+        # )
+        # self.spriteCount = 10
+
+        # Rollimg Paper
         self.sprites = self.spriteSheet.images_at(
             [
-                (0, 0, 64, 64),
-                (64, 0, 64, 64),
-                (128, 0, 64, 64),
-                (192, 0, 64, 64),
-                (256, 0, 64, 64),
-                (320, 0, 64, 64),
-                (384, 0, 64, 64),
-                (448, 0, 64, 64),
                 (0, 64, 64, 64),
                 (64, 64, 64, 64),
                 (128, 64, 64, 64),
@@ -59,24 +110,17 @@ class Player(pygame.sprite.Sprite):
                 (320, 64, 64, 64),
                 (384, 64, 64, 64),
                 (448, 64, 64, 64),
-                (0, 128, 64, 64),
-                (64, 128, 64, 64),
-                (128, 128, 64, 64),
-                (192, 128, 64, 64),
-                (256, 128, 64, 64),
-                (320, 128, 64, 64),
-                (384, 128, 64, 64),
-                (448, 128, 64, 64),
-                (0, 192, 64, 64),
-                (64, 192, 64, 64),
-                (128, 192, 64, 64),
-                (192, 192, 64, 64),
-                (256, 192, 64, 64),
-                (320, 192, 64, 64),
-                (384, 192, 64, 64),
-                (448, 192, 64, 64),
+                (512, 64, 64, 64),
+                (576, 64, 64, 64),
+                (576, 64, 64, 64),
+                (640, 64, 64, 64),
+                (704, 64, 64, 64),
+                (768, 64, 64, 64),
+                (832, 64, 64, 64),
+                (896, 64, 64, 64),
             ], [255, 0, 255]  # Color Key for alpha
         )
+        self.spriteCount = 16
 
     def set_image(self, sprite_index, center):
         self.image = self.sprites[sprite_index]
@@ -85,11 +129,11 @@ class Player(pygame.sprite.Sprite):
 
     def update(self, *args):
         self.animTime += self.animFramerate * args[0]
-        image_index = int(self.animTime) % 32
+        image_index = int(self.animTime) % self.spriteCount
 
         # If the animation time is negative, this makes the index valid to use
         if image_index < 0:
-            image_index += 32
+            image_index += self.spriteCount
 
         self.set_image(image_index, args[1])
 
@@ -110,7 +154,7 @@ clock = pygame.time.Clock()
 
 # Used to test key input, joystick input, and framerate independence
 position = [size[0] / 2, size[1] / 2]
-player = pygame.sprite.GroupSingle(Player(position, 60.0))
+player = pygame.sprite.GroupSingle(Player(position, 30.0))
 circleRadius = 32
 framerate = 60
 speed = 500
