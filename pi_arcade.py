@@ -23,7 +23,7 @@ class Player(pygame.sprite.Sprite):
 
         # Hard coded sprite loading
         self.spriteSheet = spritesheet.SpriteSheet("paper_animation.png")
-        self.spriteCount = 0;
+        self.spriteCount = 0
 
         self.sprites = []
         self.animFramerate = anim_framerate
