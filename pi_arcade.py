@@ -18,124 +18,77 @@ BLUE = (0, 0, 255)
 # Player class with hard coded sprite
 class Player(pygame.sprite.Sprite):
 
-    def __init__(self, center, anim_framerate=60.0):
-        pygame.sprite.Sprite.__init__(self)
+	def __init__(self, center, anim_framerate=60.0):
+		pygame.sprite.Sprite.__init__(self)
 
-        # Hard coded sprite loading
-        self.spriteSheet = spritesheet.SpriteSheet("paper_animation.png")
-        self.spriteCount = 0
+		# Hard coded sprite loading
+		self.spriteSheet = spritesheet.SpriteSheet("paper_animation.png")
+		self.spriteCount = 0
 
-        self.sprites = []
-        self.animFramerate = anim_framerate
-        self.animTime = 0
+		self.sprites = []
+		self.animFramerate = anim_framerate
+		self.animTime = 0
+		
+		self.reload_sprites(self.gen_sprite_list(16,16,64,64,1),16, [255,0,255])
+		
+		self.image = None
+		self.rect = None
+		self.set_image(0, center)
 
-        self.reload_sprites()
+	def get_anim_framerate(self):
+		return self.animFramerate
 
-        self.image = None
-        self.rect = None
-        self.set_image(0, center)
+	def set_anim_framerate(self, anim_framerate):
+		self.animFramerate = anim_framerate
+		
+	def gen_sprite_list(self, numSprites, numSpritesPerRow, spriteXSize, spriteYSize, StartRow):
+		#Generates locations of sprites on a sprite sheet given certian values, output 
+		#can then be fed to the spriteSheet.images_at function as the first argument
+		
+		# numSpritesPerRow: self expl.
+		# numSprites: self expl.
+		# spriteYSize: self expl.
+		# spriteXSize: self expl.
+		# colorKey: self expl.
+		# StartRow: Row the sprite starts on within the file (0 Based)
+		# 
+	
+	
+		i = 0 #iteration
+		currRowOnSprite = 0 #Sprite within the current row its iterating on
+		currRow = StartRow #Row it's iterating on, starting with arg
+		currSpriteSheet = [] #Array of tuples of the locations of all the sprites, generated
+		while i < numSprites:
+			if currRowOnSprite < numSpritesPerRow:
+				currSpriteSheet.append(((currRowOnSprite*spriteXSize),(currRow*spriteYSize),spriteXSize,spriteYSize))
+				i +=1
+				currRowOnSprite +=1
+			else:
+				currRowOnSprite = 0
+				currRow +=1	
+		return currSpriteSheet
+	def reload_sprites(self,currSpriteSheet,numSprites,ColorKey):
+		#currSpriteSheet: Array of sprite sheet tuple values (Created by gen_sprite_list)
+		#numSprites: Number of total sprites
+		#ColorKey: Color key for spriteSheet.images_at arg
 
-    def get_anim_framerate(self):
-        return self.animFramerate
+		# Iterates Sprite loacation list from left to right, top to bottom
+		self.sprites = self.spriteSheet.images_at(currSpriteSheet,ColorKey)
+		self.spriteCount = numSprites
+	def set_image(self, sprite_index, center):
+		self.image = self.sprites[sprite_index]
+		self.rect = self.image.get_rect()
+		self.rect.center = center
 
-    def set_anim_framerate(self, anim_framerate):
-        self.animFramerate = anim_framerate
+	def update(self, *args):
+		self.animTime += self.animFramerate * args[0]
+		image_index = int(self.animTime) % self.spriteCount
 
-    def reload_sprites(self):
-        # Hard coded sprite loading
-        # Spinning ball
-        # self.sprites = self.spriteSheet.images_at(
-        #     [
-        #         (0, 0, 64, 64),
-        #         (64, 0, 64, 64),
-        #         (128, 0, 64, 64),
-        #         (192, 0, 64, 64),
-        #         (256, 0, 64, 64),
-        #         (320, 0, 64, 64),
-        #         (384, 0, 64, 64),
-        #         (448, 0, 64, 64),
-        #         (0, 64, 64, 64),
-        #         (64, 64, 64, 64),
-        #         (128, 64, 64, 64),
-        #         (192, 64, 64, 64),
-        #         (256, 64, 64, 64),
-        #         (320, 64, 64, 64),
-        #         (384, 64, 64, 64),
-        #         (448, 64, 64, 64),
-        #         (0, 128, 64, 64),
-        #         (64, 128, 64, 64),
-        #         (128, 128, 64, 64),
-        #         (192, 128, 64, 64),
-        #         (256, 128, 64, 64),
-        #         (320, 128, 64, 64),
-        #         (384, 128, 64, 64),
-        #         (448, 128, 64, 64),
-        #         (0, 192, 64, 64),
-        #         (64, 192, 64, 64),
-        #         (128, 192, 64, 64),
-        #         (192, 192, 64, 64),
-        #         (256, 192, 64, 64),
-        #         (320, 192, 64, 64),
-        #         (384, 192, 64, 64),
-        #         (448, 192, 64, 64),
-        #     ], [255, 0, 255]  # Color Key for alpha
-        # )
-        # self.spriteCount = 32
+		# If the animation time is negative, this makes the index valid to use
+		if image_index < 0:
+			image_index += self.spriteCount
 
-        # Spinning paper
-        # self.sprites = self.spriteSheet.images_at(
-        #     [
-        #         (0, 0, 64, 64),
-        #         (64, 0, 64, 64),
-        #         (128, 0, 64, 64),
-        #         (192, 0, 64, 64),
-        #         (256, 0, 64, 64),
-        #         (320, 0, 64, 64),
-        #         (384, 0, 64, 64),
-        #         (448, 0, 64, 64),
-        #         (512, 0, 64, 64),
-        #         (576, 0, 64, 64),
-        #     ], [255, 0, 255]  # Color Key for alpha
-        # )
-        # self.spriteCount = 10
-
-        # Rollimg Paper
-        self.sprites = self.spriteSheet.images_at(
-            [
-                (0, 64, 64, 64),
-                (64, 64, 64, 64),
-                (128, 64, 64, 64),
-                (192, 64, 64, 64),
-                (256, 64, 64, 64),
-                (320, 64, 64, 64),
-                (384, 64, 64, 64),
-                (448, 64, 64, 64),
-                (512, 64, 64, 64),
-                (576, 64, 64, 64),
-                (576, 64, 64, 64),
-                (640, 64, 64, 64),
-                (704, 64, 64, 64),
-                (768, 64, 64, 64),
-                (832, 64, 64, 64),
-                (896, 64, 64, 64),
-            ], [255, 0, 255]  # Color Key for alpha
-        )
-        self.spriteCount = 16
-
-    def set_image(self, sprite_index, center):
-        self.image = self.sprites[sprite_index]
-        self.rect = self.image.get_rect()
-        self.rect.center = center
-
-    def update(self, *args):
-        self.animTime += self.animFramerate * args[0]
-        image_index = int(self.animTime) % self.spriteCount
-
-        # If the animation time is negative, this makes the index valid to use
-        if image_index < 0:
-            image_index += self.spriteCount
-
-        self.set_image(image_index, args[1])
+		self.set_image(image_index, args[1])
 
 pygame.init()
 
@@ -167,118 +120,204 @@ hasJoystick = False
 joystick = None
 
 if pygame.joystick.get_count() > 0:
-    joystick = pygame.joystick.Joystick(0)
-    joystick.init()
-    hasJoystick = joystick.get_numaxes() >= 2
+	joystick = pygame.joystick.Joystick(0)
+	joystick.init()
+	hasJoystick = joystick.get_numaxes() >= 2
 
 print("Has Joystick: " + str(hasJoystick))
 
 # -------- Main Program Loop -----------
 while running:
-    # --- Main event loop
-    for event in pygame.event.get():
-        if event.type == pygame.QUIT:
-            running = False
-        if event.type == pygame.KEYDOWN:
-            if event.key == pygame.K_r:
-                player.sprite.set_anim_framerate(-player.sprite.get_anim_framerate())
-            if event.key == pygame.K_PAGEUP:
-                player.sprite.set_anim_framerate(player.sprite.get_anim_framerate() + 5)
-            if event.key == pygame.K_PAGEDOWN:
-                player.sprite.set_anim_framerate(player.sprite.get_anim_framerate() - 5)
+	# --- Main event loop
+	for event in pygame.event.get():
+		if event.type == pygame.QUIT:
+			running = False
+		if event.type == pygame.KEYDOWN:
+			if event.key == pygame.K_r:
+				player.sprite.set_anim_framerate(-player.sprite.get_anim_framerate())
+			if event.key == pygame.K_PAGEUP:
+				player.sprite.set_anim_framerate(player.sprite.get_anim_framerate() + 5)
+			if event.key == pygame.K_PAGEDOWN:
+				player.sprite.set_anim_framerate(player.sprite.get_anim_framerate() - 5)
 
-    # --- Game logic should go here
+	# --- Game logic should go here
 
-    # Input
-    movement = [0.0, 0.0]
+	# Input
+	movement = [0.0, 0.0]
 
-    if hasJoystick:
-        # Use joystick if one exists
+	if hasJoystick:
+		# Use joystick if one exists
 
-        # D-Pad (digital joystick)
-        # hat = joystick.get_hat(0)
-        # movement[0] = hat[0]
-        # movement[1] = -hat[1]
+		# D-Pad (digital joystick)
+		# hat = joystick.get_hat(0)
+		# movement[0] = hat[0]
+		# movement[1] = -hat[1]
 
-        # Actual Joystick (analog joystick)
-        movement[0] = joystick.get_axis(0)
-        movement[1] = joystick.get_axis(1)
+		# Actual Joystick (analog joystick)
+		movement[0] = joystick.get_axis(0)
+		movement[1] = joystick.get_axis(1)
 
-        # Tolerance check to correct hardware imprecision
-        if abs(movement[0]) < joyTolerance:
-            movement[0] = 0
+		# Tolerance check to correct hardware imprecision
+		if abs(movement[0]) < joyTolerance:
+			movement[0] = 0
 
-        if abs(movement[1]) < joyTolerance:
-            movement[1] = 0
+		if abs(movement[1]) < joyTolerance:
+			movement[1] = 0
 
-    else:
-        # Use keyboard if joystick does not exist
-        pressedKeys = pygame.key.get_pressed()
+	else:
+		# Use keyboard if joystick does not exist
+		pressedKeys = pygame.key.get_pressed()
 
-        # Input logic for keys designed to zero out movement when
-        # both keys on axis are pressed (up/down or left/right)
-        if pressedKeys[pygame.K_a] or pressedKeys[pygame.K_LEFT]:
-            movement[0] -= 1
+		# Input logic for keys designed to zero out movement when
+		# both keys on axis are pressed (up/down or left/right)
+		if pressedKeys[pygame.K_a] or pressedKeys[pygame.K_LEFT]:
+			movement[0] -= 1
 
-        if pressedKeys[pygame.K_d] or pressedKeys[pygame.K_RIGHT]:
-            movement[0] += 1
+		if pressedKeys[pygame.K_d] or pressedKeys[pygame.K_RIGHT]:
+			movement[0] += 1
 
-        if pressedKeys[pygame.K_w] or pressedKeys[pygame.K_UP]:
-            movement[1] -= 1
+		if pressedKeys[pygame.K_w] or pressedKeys[pygame.K_UP]:
+			movement[1] -= 1
 
-        if pressedKeys[pygame.K_s] or pressedKeys[pygame.K_DOWN]:
-            movement[1] += 1
+		if pressedKeys[pygame.K_s] or pressedKeys[pygame.K_DOWN]:
+			movement[1] += 1
 
-    # Normalize movement
-    sqMagnitude = (movement[0] * movement[0]) + (movement[1] * movement[1])
-    if sqMagnitude > 1:
-        magnitude = math.sqrt(sqMagnitude)
-        movement[0] /= magnitude
-        movement[1] /= magnitude
+	# Normalize movement
+	sqMagnitude = (movement[0] * movement[0]) + (movement[1] * movement[1])
+	if sqMagnitude > 1:
+		magnitude = math.sqrt(sqMagnitude)
+		movement[0] /= magnitude
+		movement[1] /= magnitude
 
-    # Apply movement modified by speed and delta time to position
-    position[0] += movement[0] * speed * deltaTime
-    position[1] += movement[1] * speed * deltaTime
+	# Apply movement modified by speed and delta time to position
+	position[0] += movement[0] * speed * deltaTime
+	position[1] += movement[1] * speed * deltaTime
 
-    # Clamp position to screen
-    if position[0] < 0 + circleRadius:
-        position[0] = 0 + circleRadius
+	# Clamp position to screen
+	if position[0] < 0 + circleRadius:
+		position[0] = 0 + circleRadius
 
-    if position[0] > size[0] - circleRadius:
-        position[0] = size[0] - circleRadius
+	if position[0] > size[0] - circleRadius:
+		position[0] = size[0] - circleRadius
 
-    if position[1] < 0 + circleRadius:
-        position[1] = 0 + circleRadius
+	if position[1] < 0 + circleRadius:
+		position[1] = 0 + circleRadius
 
-    if position[1] > size[1] - circleRadius:
-        position[1] = size[1] - circleRadius
+	if position[1] > size[1] - circleRadius:
+		position[1] = size[1] - circleRadius
 
-    player.update(deltaTime, position)
+	player.update(deltaTime, position)
 
-    # Debug position and delta time
-    # print(str(position[0]) + " : " + str(position[1]) + " : " + str(deltaTime));
+	# Debug position and delta time
+	# print(str(position[0]) + " : " + str(position[1]) + " : " + str(deltaTime));
 
-    # --- Screen-clearing code goes here
+	# --- Screen-clearing code goes here
 
-    # Here, we clear the screen to white. Don't put other drawing commands
-    # above this, or they will be erased with this command.
+	# Here, we clear the screen to white. Don't put other drawing commands
+	# above this, or they will be erased with this command.
 
-    # If you want a background image, replace this clear with blit'ing the
-    # background image.
-    # screen.fill(WHITE)
-    screen.blit(background, (0, 0))
+	# If you want a background image, replace this clear with blit'ing the
+	# background image.
+	# screen.fill(WHITE)
+	screen.blit(background, (0, 0))
 
-    # --- Drawing code should go here
+	# --- Drawing code should go here
 
-    # Draw a circle at position
-    # pygame.draw.circle(screen, BLUE, [int(position[0]), int(position[1])], circleRadius)
-    player.draw(screen)
+	# Draw a circle at position
+	# pygame.draw.circle(screen, BLUE, [int(position[0]), int(position[1])], circleRadius)
+	player.draw(screen)
 
-    # --- Go ahead and update the screen with what we've drawn.
-    pygame.display.flip()
+	# --- Go ahead and update the screen with what we've drawn.
+	pygame.display.flip()
 
-    # --- Limit to 60 frames per second
-    deltaTime = clock.tick_busy_loop(framerate) / 1000.0
+	# --- Limit to 60 frames per second
+	deltaTime = clock.tick_busy_loop(framerate) / 1000.0
 
 # Close the window and quit.
 pygame.quit()
+
+
+
+######## HARD-CODED SPRITE LOCATION LISTS ##########
+
+
+		# Spinning ball
+		# self.sprites = self.spriteSheet.images_at(
+		#	 [
+		#		 (0, 0, 64, 64),
+		#		 (64, 0, 64, 64),
+		#		 (128, 0, 64, 64),
+		#		 (192, 0, 64, 64),
+		#		 (256, 0, 64, 64),
+		#		 (320, 0, 64, 64),
+		#		 (384, 0, 64, 64),
+		#		 (448, 0, 64, 64),
+		#		 (0, 64, 64, 64),
+		#		 (64, 64, 64, 64),
+		#		 (128, 64, 64, 64),
+		#		 (192, 64, 64, 64),
+		#		 (256, 64, 64, 64),
+		#		 (320, 64, 64, 64),
+		#		 (384, 64, 64, 64),
+		#		 (448, 64, 64, 64),
+		#		 (0, 128, 64, 64),
+		#		 (64, 128, 64, 64),
+		#		 (128, 128, 64, 64),
+		#		 (192, 128, 64, 64),
+		#		 (256, 128, 64, 64),
+		#		 (320, 128, 64, 64),
+		#		 (384, 128, 64, 64),
+		#		 (448, 128, 64, 64),
+		#		 (0, 192, 64, 64),
+		#		 (64, 192, 64, 64),
+		#		 (128, 192, 64, 64),
+		#		 (192, 192, 64, 64),
+		#		 (256, 192, 64, 64),
+		#		 (320, 192, 64, 64),
+		#		 (384, 192, 64, 64),
+		#		 (448, 192, 64, 64),
+		#	 ], [255, 0, 255]  # Color Key for alpha
+		# )
+		# self.spriteCount = 32
+
+		# Spinning paper
+		# self.sprites = self.spriteSheet.images_at(
+		#	 [
+		#		 (0, 0, 64, 64),
+		#		 (64, 0, 64, 64),
+		#		 (128, 0, 64, 64),
+		#		 (192, 0, 64, 64),
+		#		 (256, 0, 64, 64),
+		#		 (320, 0, 64, 64),
+		#		 (384, 0, 64, 64),
+		#		 (448, 0, 64, 64),
+		#		 (512, 0, 64, 64),
+		#		 (576, 0, 64, 64),
+		#	 ], [255, 0, 255]  # Color Key for alpha
+		# )
+		# self.spriteCount = 10
+
+		# Rollimg Paper
+'''
+self.sprites = self.spriteSheet.images_at(
+	[
+		(0, 64, 64, 64),
+		(64, 64, 64, 64),
+		(128, 64, 64, 64),
+		(192, 64, 64, 64),
+		(256, 64, 64, 64),
+		(320, 64, 64, 64),
+		(384, 64, 64, 64),
+		(448, 64, 64, 64),
+		(512, 64, 64, 64),
+		(576, 64, 64, 64),
+		(576, 64, 64, 64),
+		(640, 64, 64, 64),
+		(704, 64, 64, 64),
+		(768, 64, 64, 64),
+		(832, 64, 64, 64),
+		(896, 64, 64, 64),
+	], [255, 0, 255]  # Color Key for alpha
+)
+self.spriteCount = 16
+'''	
