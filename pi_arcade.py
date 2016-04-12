@@ -20,16 +20,16 @@ class Player(pygame.sprite.Sprite):
 
 	def __init__(self, center, anim_framerate=60.0):
 		pygame.sprite.Sprite.__init__(self)
-
+		self.currentSpriteLocation = "resources/img/" + "paper_animation.png"
 		# Hard coded sprite loading
-		self.spriteSheet = spritesheet.SpriteSheet("paper_animation.png")
+		self.spriteSheet = spritesheet.SpriteSheet(self.currentSpriteLocation)
 		self.spriteCount = 0
 
 		self.sprites = []
 		self.animFramerate = anim_framerate
 		self.animTime = 0
 		
-		self.reload_sprites(self.gen_sprite_list(16,16,64,64,1),16, [255,0,255])
+		self.reload_sprites(self.gen_sprite_list(16,16,64,64,1),16,[255,0,255])
 		
 		self.image = None
 		self.rect = None
@@ -95,7 +95,7 @@ pygame.init()
 # Set the width and height of the screen [width, height]
 size = (700, 500)
 screen = pygame.display.set_mode(size)
-background = pygame.image.load("background.jpg").convert()
+background = pygame.image.load("resources/img/background.jpg").convert()
 
 pygame.display.set_caption("My Game")
 
