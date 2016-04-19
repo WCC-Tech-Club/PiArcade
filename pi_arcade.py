@@ -7,6 +7,8 @@ import pygame.sprite
 
 import spritesheet
 
+import arcadeUtils as util
+
 # Define some colors
 BLACK = (0, 0, 0)
 WHITE = (255, 255, 255)
@@ -20,7 +22,7 @@ class Player(pygame.sprite.Sprite):
 
 	def __init__(self, center, anim_framerate=60.0):
 		pygame.sprite.Sprite.__init__(self)
-		self.currentSpriteLocation = "resources/img/" + "paper_animation.png"
+		self.currentSpriteLocation = "resources/img/" + "flying_enemies.png"
 		# Hard coded sprite loading
 		self.spriteSheet = spritesheet.SpriteSheet(self.currentSpriteLocation)
 		self.spriteCount = 0
@@ -29,8 +31,8 @@ class Player(pygame.sprite.Sprite):
 		self.animFramerate = anim_framerate
 		self.animTime = 0
 		
-		self.reload_sprites(self.gen_sprite_list(16,16,64,64,1),16,[255,0,255])
-		
+		self.reload_sprites(util.gen_sprite_list(11,11,128,64,0),11,[255,0,255])
+		print(util.gen_sprite_list(10,10,192,64,1))
 		self.image = None
 		self.rect = None
 		self.set_image(0, center)
@@ -41,32 +43,6 @@ class Player(pygame.sprite.Sprite):
 	def set_anim_framerate(self, anim_framerate):
 		self.animFramerate = anim_framerate
 		
-	def gen_sprite_list(self, numSprites, numSpritesPerRow, spriteXSize, spriteYSize, StartRow):
-		#Generates locations of sprites on a sprite sheet given certian values, output 
-		#can then be fed to the spriteSheet.images_at function as the first argument
-		
-		# numSpritesPerRow: self expl.
-		# numSprites: self expl.
-		# spriteYSize: self expl.
-		# spriteXSize: self expl.
-		# colorKey: self expl.
-		# StartRow: Row the sprite starts on within the file (0 Based)
-		# 
-	
-	
-		i = 0 #iteration
-		currRowOnSprite = 0 #Sprite within the current row its iterating on
-		currRow = StartRow #Row it's iterating on, starting with arg
-		currSpriteSheet = [] #Array of tuples of the locations of all the sprites, generated
-		while i < numSprites:
-			if currRowOnSprite < numSpritesPerRow:
-				currSpriteSheet.append(((currRowOnSprite*spriteXSize),(currRow*spriteYSize),spriteXSize,spriteYSize))
-				i +=1
-				currRowOnSprite +=1
-			else:
-				currRowOnSprite = 0
-				currRow +=1	
-		return currSpriteSheet
 	def reload_sprites(self,currSpriteSheet,numSprites,ColorKey):
 		#currSpriteSheet: Array of sprite sheet tuple values (Created by gen_sprite_list)
 		#numSprites: Number of total sprites
