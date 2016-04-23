@@ -1,18 +1,20 @@
-from pygame.sprite import *
+import pi_globals
+
+from pygame.sprite import Sprite
 
 class AnimationController:
 
-	__target = None
+	__target = None             # The target sprite (pygame sprite object) that is to be animated
 
-	__spritesheet = None
-	__spriteIndex = 0
+	__spritesheet = None        # Array of surfaces (traditional sprites) to act as animation frames
+	__spriteIndex = 0           # Current sprite from the sprite sheet applied to the target
 
-	__animTime = 0.0
-	__animStart = 0
-	__animLength = 1
+	__animTime = 0.0            # Time in seconds an animation strip has been playing
+	__animStart = 0             # The start index from the sprite sheet for the animation strip
+	__animLength = 1            # The length of the strip to animate
 
-	animFramerate = 30.0
-	enabled = True
+	animFramerate = 30.0        # The number of frames (sprites from the sprite sheet) to cycle through per second
+	enabled = False             # boolean flag to control if the controller should animate
 
 	def __index__(self, target, spriteSheet, animFramerate = 30.0):
 		self.__target = target
@@ -45,9 +47,9 @@ class AnimationController:
 		self.animFramerate = animFrameRate
 		self.spriteIndex = animStart
 
-	def update(self, deltaTime):
+	def update(self):
 		if self.enabled:
-			self.__animTime += self.animFramerate * deltaTime
+			self.__animTime += self.animFramerate * pi_globals.deltaTime
 			animStep = int(self.__animTime) % self.animLength
 
 			# If the animation time is negative, this makes the index valid to use

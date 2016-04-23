@@ -1,87 +1,51 @@
+import pi_globals
+
 from pygame.math import *
 from pygame.sprite import *
 
+from animation import AnimationController
+
 class Projectile(Sprite):
 
-	__renderImages = None       # Array of images used to render the projectile
-	__renderIndex = 0           # Current index used to select a image
-
-	animate = False             # Flat to determine if the projectile should animate
-	animFrameRate = 0.0         # Number of render images cycled per second
-	__animTime = 0.0            # Global animation time, constant used to calculate correct render index
-	__animStart = 0             # The starting render index to use (inclusive)
-	__animLength = 0            # The number if render images that make up the animation
+	__animController = None     # Animation controller for animation
 
 	position = Vector2(0, 0)    # Position in 2D space of the projectile
 	velocity = Vector2(0, 0)    # Velocity vector of the projectile
 	arcGravity = 0.0            # "Gravity" force of the projectile to simulate an throw arc
 
-	collisionRadius = 0.0       # Circle collider radius centered at position
-
-	def __init__(self, renderImages, collisionRadius, position, velocity, arcGravity = 0):
+	def __init__(self, spriteSheet, collisionRadius, position, velocity, arcGravity = 0):
 		Sprite.__init__(self)
-		self.image = None
-		self.rect = None
-
-		self.collisionRadius = collisionRadius
+		self.image = spriteSheet[0]
+		self.rect = self.image.get_rect()
+		self.rect.radius = collisionRadius
 		self.position = position
 		self.velocity = velocity
 		self.arcGravity = arcGravity
+		self.__animController = AnimationController(self, spriteSheet)
 
-		self.__renderImages = renderImages
-		self.setRenderIndex(0)
+	def getAnimController(self):
+		return self.__animController
 
-	def getRenderIndex(self):
-		return self.__renderIndex
+	animController = property(getAnimController)
 
-	def setRenderIndex(self, renderIndex):
-		if renderIndex == self.__renderIndex:
-			pass
+	def getCollisionRadius(self):
+		return self.rect.radius
 
-		self.__renderIndex = renderIndex
-		self.image = self.__renderImages[renderIndex]
-
-		# Something tells me this is bad to do seeing as it will be called quite often (this creates a new rect object I think)
-		self.rect = self.image.get_rect(center = self.position, radius = self.collisionRadius)
-
-	renderIndex = property(getRenderIndex, setRenderIndex)
-
-	def getAnimStart(self):
-		return self.__animStart
-
-	animStart = property(getAnimStart)
-
-	def getAnimLength(self):
-		return self.__animLength
-
-	animLength = property(getAnimLength)
-
-	def setAnimStrip(self, animStart, animLength):
-		self.__animStart = animStart
-		self.__animLength = animLength
-		self.__animTime = 0.0
-		self.setRenderIndex(animStart)
+	collisionRadius = property(getCollisionRadius)
 
 	# Args[0] is must be delta time (amount in seconds between frames)
-	def update(self, *args):
+	def update(self):
 
 		# add velocity to position taking into account the delta time
-		self.position += self.velocity * args[0]
+		self.position += self.velocity * pi_globals.deltaTime
 
 		# (0, 0) is at the top left corner so arc gravity induces a positive y shift (delta time applied as well)
-		self.position.y += self.arcGravity * args[0]
+		self.position.y += self.arcGravity * pi_globals.deltaTime
 		if self.position.y > self.arcGravity:
 			self.position.y = self.arcGravity
 
 		# Animation
-		if self.animate:
-			self.__animTime += self.animFrameRate * args[0]
-			animStep = int(self.__animTime) % self.animLength
+		self.animController.update()
 
-			# If the animation time is negative, this makes the index valid to use
-			if animStep < 0:
-				animStep += self.animLength
-
-			self.setRenderIndex(animStep + self.animStart)
-
+		# Update rect center with position
 		self.rect.center = self.position

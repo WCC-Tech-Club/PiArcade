@@ -1,96 +1,36 @@
 import math
 
-import pygame
 import pygame.key
 import pygame.draw
 import pygame.sprite
 
+import pi_globals
 import spritesheet
 
 import arcadeUtils as util
 
-# Define some colors
-BLACK = (0, 0, 0)
-WHITE = (255, 255, 255)
-RED = (255, 0, 0)
-GREEN = (0, 255, 0)
-BLUE = (0, 0, 255)
+from pygame import display
+from pygame.time import Clock
+from pygame.sprite import Group
+from pygame.sprite import GroupSingle
 
-
-# Player class with hard coded sprite
-class Player(pygame.sprite.Sprite):
-
-	def __init__(self, center, anim_framerate=60.0):
-		pygame.sprite.Sprite.__init__(self)
-		self.currentSpriteLocation = "resources/img/" + "flying_enemies.png"
-		# Hard coded sprite loading
-		self.spriteSheet = spritesheet.SpriteSheet(self.currentSpriteLocation)
-		self.spriteCount = 0
-
-		self.sprites = []
-		self.animFramerate = anim_framerate
-		self.animTime = 0
-		
-		self.reload_sprites(util.gen_sprite_list(11,11,128,64,0),11,[255,0,255])
-		print(util.gen_sprite_list(10,10,192,64,1))
-		self.image = None
-		self.rect = None
-		self.set_image(0, center)
-
-	def get_anim_framerate(self):
-		return self.animFramerate
-
-	def set_anim_framerate(self, anim_framerate):
-		self.animFramerate = anim_framerate
-		
-	def reload_sprites(self,currSpriteSheet,numSprites,ColorKey):
-		#currSpriteSheet: Array of sprite sheet tuple values (Created by gen_sprite_list)
-		#numSprites: Number of total sprites
-		#ColorKey: Color key for spriteSheet.images_at arg
-
-		# Iterates Sprite loacation list from left to right, top to bottom
-		self.sprites = self.spriteSheet.images_at(currSpriteSheet,ColorKey)
-		self.spriteCount = numSprites
-	def set_image(self, sprite_index, center):
-		self.image = self.sprites[sprite_index]
-		self.rect = self.image.get_rect()
-		self.rect.center = center
-
-	def update(self, *args):
-		self.animTime += self.animFramerate * args[0]
-		image_index = int(self.animTime) % self.spriteCount
-
-		# If the animation time is negative, this makes the index valid to use
-		if image_index < 0:
-			image_index += self.spriteCount
-
-		self.set_image(image_index, args[1])
-
+# Initialize pygame
 pygame.init()
 
-# Set the width and height of the screen [width, height]
-size = (700, 500)
-screen = pygame.display.set_mode(size)
-background = pygame.image.load("resources/img/background.jpg").convert()
+# Set the display mode to full screen with monitor resolution
+pygame.display.set_mode((0,0), pygame.FULLSCREEN)
 
-pygame.display.set_caption("My Game")
+# Game loop clock
+clock = Clock()
 
-# Loop until the user clicks the close button.
+# Game loop will run until this is false
 running = True
 
-# Used to manage how fast the screen updates
-clock = pygame.time.Clock()
-
-# Used to test key input, joystick input, and framerate independence
-position = [size[0] / 2, size[1] / 2]
-player = pygame.sprite.GroupSingle(Player(position, 30.0))
-circleRadius = 32
-framerate = 60
-speed = 500
-deltaTime = 1 / framerate
-joyTolerance = 0.2
+# Sprites & Sprite Groups
+projectileGroup = Group()
 
 # Joystick initialization
+# TODO Move joystick stuff to a input management file
 pygame.joystick.init()
 hasJoystick = False
 joystick = None
@@ -104,115 +44,188 @@ print("Has Joystick: " + str(hasJoystick))
 
 # -------- Main Program Loop -----------
 while running:
-	# --- Main event loop
+
+	# TODO Move input event stuff to input management file
+	# Do we even need to use this? All input will be coming from joystick stuff
 	for event in pygame.event.get():
-		if event.type == pygame.QUIT:
-			running = False
 		if event.type == pygame.KEYDOWN:
-			if event.key == pygame.K_r:
-				player.sprite.set_anim_framerate(-player.sprite.get_anim_framerate())
-			if event.key == pygame.K_PAGEUP:
-				player.sprite.set_anim_framerate(player.sprite.get_anim_framerate() + 5)
-			if event.key == pygame.K_PAGEDOWN:
-				player.sprite.set_anim_framerate(player.sprite.get_anim_framerate() - 5)
+			if event.key == pygame.K_ESCAPE:
+				running = False
 
-	# --- Game logic should go here
+	# Update screen with what has been drawn
+	display.flip()
 
-	# Input
-	movement = [0.0, 0.0]
-
-	if hasJoystick:
-		# Use joystick if one exists
-
-		# D-Pad (digital joystick)
-		# hat = joystick.get_hat(0)
-		# movement[0] = hat[0]
-		# movement[1] = -hat[1]
-
-		# Actual Joystick (analog joystick)
-		movement[0] = joystick.get_axis(0)
-		movement[1] = joystick.get_axis(1)
-
-		# Tolerance check to correct hardware imprecision
-		if abs(movement[0]) < joyTolerance:
-			movement[0] = 0
-
-		if abs(movement[1]) < joyTolerance:
-			movement[1] = 0
-
-	else:
-		# Use keyboard if joystick does not exist
-		pressedKeys = pygame.key.get_pressed()
-
-		# Input logic for keys designed to zero out movement when
-		# both keys on axis are pressed (up/down or left/right)
-		if pressedKeys[pygame.K_a] or pressedKeys[pygame.K_LEFT]:
-			movement[0] -= 1
-
-		if pressedKeys[pygame.K_d] or pressedKeys[pygame.K_RIGHT]:
-			movement[0] += 1
-
-		if pressedKeys[pygame.K_w] or pressedKeys[pygame.K_UP]:
-			movement[1] -= 1
-
-		if pressedKeys[pygame.K_s] or pressedKeys[pygame.K_DOWN]:
-			movement[1] += 1
-
-	# Normalize movement
-	sqMagnitude = (movement[0] * movement[0]) + (movement[1] * movement[1])
-	if sqMagnitude > 1:
-		magnitude = math.sqrt(sqMagnitude)
-		movement[0] /= magnitude
-		movement[1] /= magnitude
-
-	# Apply movement modified by speed and delta time to position
-	position[0] += movement[0] * speed * deltaTime
-	position[1] += movement[1] * speed * deltaTime
-
-	# Clamp position to screen
-	if position[0] < 0 + circleRadius:
-		position[0] = 0 + circleRadius
-
-	if position[0] > size[0] - circleRadius:
-		position[0] = size[0] - circleRadius
-
-	if position[1] < 0 + circleRadius:
-		position[1] = 0 + circleRadius
-
-	if position[1] > size[1] - circleRadius:
-		position[1] = size[1] - circleRadius
-
-	player.update(deltaTime, position)
-
-	# Debug position and delta time
-	# print(str(position[0]) + " : " + str(position[1]) + " : " + str(deltaTime));
-
-	# --- Screen-clearing code goes here
-
-	# Here, we clear the screen to white. Don't put other drawing commands
-	# above this, or they will be erased with this command.
-
-	# If you want a background image, replace this clear with blit'ing the
-	# background image.
-	# screen.fill(WHITE)
-	screen.blit(background, (0, 0))
-
-	# --- Drawing code should go here
-
-	# Draw a circle at position
-	# pygame.draw.circle(screen, BLUE, [int(position[0]), int(position[1])], circleRadius)
-	player.draw(screen)
-
-	# --- Go ahead and update the screen with what we've drawn.
-	pygame.display.flip()
-
-	# --- Limit to 60 frames per second
-	deltaTime = clock.tick_busy_loop(framerate) / 1000.0
+	# Game loop clock tick and delta time calculation
+	pi_globals.deltaTime = clock.tick_busy_loop(pi_globals.FRAMERATE) / 1000.0
 
 # Close the window and quit.
 pygame.quit()
 
+######## Refrence Player ########
 
+# Player class with hard coded sprite
+# class Player(pygame.sprite.Sprite):
+#
+# 	def __init__(self, center, anim_framerate=60.0):
+# 		pygame.sprite.Sprite.__init__(self)
+# 		self.currentSpriteLocation = "resources/img/" + "flying_enemies.png"
+# 		# Hard coded sprite loading
+# 		self.spriteSheet = spritesheet.SpriteSheet(self.currentSpriteLocation)
+# 		self.spriteCount = 0
+#
+# 		self.sprites = []
+# 		self.animFramerate = anim_framerate
+# 		self.animTime = 0
+#
+# 		self.reload_sprites(util.gen_sprite_list(11,11,128,64,0),11,[255,0,255])
+# 		print(util.gen_sprite_list(10,10,192,64,1))
+# 		self.image = None
+# 		self.rect = None
+# 		self.set_image(0, center)
+#
+# 	def get_anim_framerate(self):
+# 		return self.animFramerate
+#
+# 	def set_anim_framerate(self, anim_framerate):
+# 		self.animFramerate = anim_framerate
+#
+# 	def reload_sprites(self,currSpriteSheet,numSprites,ColorKey):
+# 		#currSpriteSheet: Array of sprite sheet tuple values (Created by gen_sprite_list)
+# 		#numSprites: Number of total sprites
+# 		#ColorKey: Color key for spriteSheet.images_at arg
+#
+# 		# Iterates Sprite loacation list from left to right, top to bottom
+# 		self.sprites = self.spriteSheet.images_at(currSpriteSheet,ColorKey)
+# 		self.spriteCount = numSprites
+# 	def set_image(self, sprite_index, center):
+# 		self.image = self.sprites[sprite_index]
+# 		self.rect = self.image.get_rect()
+# 		self.rect.center = center
+#
+# 	def update(self, *args):
+# 		self.animTime += self.animFramerate * args[0]
+# 		image_index = int(self.animTime) % self.spriteCount
+#
+# 		# If the animation time is negative, this makes the index valid to use
+# 		if image_index < 0:
+# 			image_index += self.spriteCount
+#
+# 		self.set_image(image_index, args[1])
+
+######## Refrence Main Loop ########
+
+# position = [size[0] / 2, size[1] / 2]
+# player = pygame.sprite.GroupSingle(Player(position, 30.0))
+# circleRadius = 32
+# framerate = 60
+# speed = 500
+# deltaTime = 1 / framerate
+# joyTolerance = 0.2
+
+	# --- Main event loop
+	# for event in pygame.event.get():
+	# 	if event.type == pygame.QUIT:
+	# 		running = False
+	# 	if event.type == pygame.KEYDOWN:
+	# 		if event.key == pygame.K_r:
+	# 			player.sprite.set_anim_framerate(-player.sprite.get_anim_framerate())
+	# 		if event.key == pygame.K_PAGEUP:
+	# 			player.sprite.set_anim_framerate(player.sprite.get_anim_framerate() + 5)
+	# 		if event.key == pygame.K_PAGEDOWN:
+	# 			player.sprite.set_anim_framerate(player.sprite.get_anim_framerate() - 5)
+	#
+	# # --- Game logic should go here
+	#
+	# # Input
+	# movement = [0.0, 0.0]
+	#
+	# if hasJoystick:
+	# 	# Use joystick if one exists
+	#
+	# 	# D-Pad (digital joystick)
+	# 	# hat = joystick.get_hat(0)
+	# 	# movement[0] = hat[0]
+	# 	# movement[1] = -hat[1]
+	#
+	# 	# Actual Joystick (analog joystick)
+	# 	movement[0] = joystick.get_axis(0)
+	# 	movement[1] = joystick.get_axis(1)
+	#
+	# 	# Tolerance check to correct hardware imprecision
+	# 	if abs(movement[0]) < joyTolerance:
+	# 		movement[0] = 0
+	#
+	# 	if abs(movement[1]) < joyTolerance:
+	# 		movement[1] = 0
+	#
+	# else:
+	# 	# Use keyboard if joystick does not exist
+	# 	pressedKeys = pygame.key.get_pressed()
+	#
+	# 	# Input logic for keys designed to zero out movement when
+	# 	# both keys on axis are pressed (up/down or left/right)
+	# 	if pressedKeys[pygame.K_a] or pressedKeys[pygame.K_LEFT]:
+	# 		movement[0] -= 1
+	#
+	# 	if pressedKeys[pygame.K_d] or pressedKeys[pygame.K_RIGHT]:
+	# 		movement[0] += 1
+	#
+	# 	if pressedKeys[pygame.K_w] or pressedKeys[pygame.K_UP]:
+	# 		movement[1] -= 1
+	#
+	# 	if pressedKeys[pygame.K_s] or pressedKeys[pygame.K_DOWN]:
+	# 		movement[1] += 1
+	#
+	# # Normalize movement
+	# sqMagnitude = (movement[0] * movement[0]) + (movement[1] * movement[1])
+	# if sqMagnitude > 1:
+	# 	magnitude = math.sqrt(sqMagnitude)
+	# 	movement[0] /= magnitude
+	# 	movement[1] /= magnitude
+	#
+	# # Apply movement modified by speed and delta time to position
+	# position[0] += movement[0] * speed * deltaTime
+	# position[1] += movement[1] * speed * deltaTime
+	#
+	# # Clamp position to screen
+	# if position[0] < 0 + circleRadius:
+	# 	position[0] = 0 + circleRadius
+	#
+	# if position[0] > size[0] - circleRadius:
+	# 	position[0] = size[0] - circleRadius
+	#
+	# if position[1] < 0 + circleRadius:
+	# 	position[1] = 0 + circleRadius
+	#
+	# if position[1] > size[1] - circleRadius:
+	# 	position[1] = size[1] - circleRadius
+	#
+	# player.update(deltaTime, position)
+	#
+	# # Debug position and delta time
+	# # print(str(position[0]) + " : " + str(position[1]) + " : " + str(deltaTime));
+	#
+	# # --- Screen-clearing code goes here
+	#
+	# # Here, we clear the screen to white. Don't put other drawing commands
+	# # above this, or they will be erased with this command.
+	#
+	# # If you want a background image, replace this clear with blit'ing the
+	# # background image.
+	# # screen.fill(WHITE)
+	# screen.blit(background, (0, 0))
+	#
+	# # --- Drawing code should go here
+	#
+	# # Draw a circle at position
+	# # pygame.draw.circle(screen, BLUE, [int(position[0]), int(position[1])], circleRadius)
+	# player.draw(screen)
+	#
+	# # --- Go ahead and update the screen with what we've drawn.
+	# pygame.display.flip()
+	#
+	# # --- Limit to 60 frames per second
+	# deltaTime = clock.tick_busy_loop(framerate) / 1000.0
 
 ######## HARD-CODED SPRITE LOCATION LISTS ##########
 
