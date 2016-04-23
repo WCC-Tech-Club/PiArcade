@@ -16,7 +16,7 @@ class AnimationController:
 	animFramerate = 30.0        # The number of frames (sprites from the sprite sheet) to cycle through per second
 	enabled = False             # boolean flag to control if the controller should animate
 
-	def __index__(self, target, spriteSheet, animFramerate = 30.0):
+	def __init__(self, target, spriteSheet, animFramerate = 30.0):
 		self.__target = target
 		self.__spritesheet = spriteSheet
 		self.setAnimStrip(0, len(spriteSheet), animFramerate)

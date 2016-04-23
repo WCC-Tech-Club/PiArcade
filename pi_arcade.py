@@ -5,20 +5,24 @@ import pygame.draw
 import pygame.sprite
 
 import pi_globals
-import spritesheet
 
 import arcadeUtils as util
 
 from pygame import display
 from pygame.time import Clock
+from pygame.math import Vector2
 from pygame.sprite import Group
 from pygame.sprite import GroupSingle
+
+from spritesheet import  SpriteSheet
+from player import Player
 
 # Initialize pygame
 pygame.init()
 
 # Set the display mode to full screen with monitor resolution
-pygame.display.set_mode((0,0), pygame.FULLSCREEN)
+screenSurface = pygame.display.set_mode((0,0), pygame.FULLSCREEN)
+pi_globals.screenSize = screenSurface.get_size()
 
 # Game loop clock
 clock = Clock()
@@ -27,6 +31,10 @@ clock = Clock()
 running = True
 
 # Sprites & Sprite Groups
+player = Player(SpriteSheet("resources/img/player.png").images_at(util.gen_sprite_list(7, 7, 128, 192, 0), [255, 0, 255]), 64, Vector2(128, pi_globals.screenSize[1] / 2.0))
+player.animController.enabled = True
+
+playerGroup = GroupSingle(player)
 projectileGroup = Group()
 
 # Joystick initialization
@@ -51,6 +59,24 @@ while running:
 		if event.type == pygame.KEYDOWN:
 			if event.key == pygame.K_ESCAPE:
 				running = False
+
+	screenSurface.fill(pi_globals.BLACK)
+
+	position = Vector2(0, 0)
+	pressedKeys = pygame.key.get_pressed()
+
+	if pressedKeys[pygame.K_w] or pressedKeys[pygame.K_UP]:
+		position.y -= 1
+
+	if pressedKeys[pygame.K_s] or pressedKeys[pygame.K_DOWN]:
+		position.y += 1
+
+	# Hard Coded Speed
+	player.position += position * 10;
+
+	playerGroup.update()
+
+	playerGroup.draw(screenSurface)
 
 	# Update screen with what has been drawn
 	display.flip()

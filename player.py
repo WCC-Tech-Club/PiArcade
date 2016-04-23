@@ -13,9 +13,9 @@ class Player(Sprite):
 		Sprite.__init__(self)
 		self.image = spriteSheet[0]
 		self.rect = self.image.get_rect()
-		self.rect.radius = collisionRadius
+		self.radius = collisionRadius
 		self.position = position
-		self.__animController = AnimationController(self, spriteSheet)
+		self.__animController = AnimationController(self, spriteSheet, 12)
 
 	def getAnimController(self):
 		return self.__animController
