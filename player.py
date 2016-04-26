@@ -35,3 +35,9 @@ class Player(Sprite):
 
 		# Update rect center with position
 		self.rect.center = self.position
+
+	def Shoot(self):
+        #Change center to tiop half
+		bullet_origin = self.rect.center
+
+
