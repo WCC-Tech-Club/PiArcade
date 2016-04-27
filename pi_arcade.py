@@ -33,27 +33,18 @@ clock = Clock()
 running = True
 
 # Sprites & Sprite Groups
-<<<<<<< HEAD
 player = Player(SpriteSheet("resources/img/player.png").images_at(util.gen_sprite_list(7, 7, 128, 192, 0), [255, 0, 255]), 64,Vector2(128, pi_globals.screenSize[1] / 2.0))
-player.animController.enabled = True
+player.animController.isEnabled = True
 #projectile = Projectile(SpriteSheet("resources/img/paper_animation.png").image_at(util.gen_sprite_list(26, 10, 50, 50, 0), [255, 255, 255]), 25, player.position, Vector2(25, 25), 0.0)
 
 
-def endTrowTrigger(targetPlayer):
-    targetPlayer.animController.setAnimStrip(0, 1, 18.0)
-
-=======
-player = Player(SpriteSheet("resources/img/player.png").images_at(util.gen_sprite_list(7, 7, 128, 192, 0), [255, 0, 255]), 64, Vector2(128, pi_globals.screenSize[1] / 2.0))
-player.animController.isEnabled = True
-
 def endThrowFrameEvent(targetPlayer):
 	targetPlayer.animController.playingAnimationIndex = 0
->>>>>>> origin/master
 
 player.animController.getAnimation(1).setFrameEvent(5, endThrowFrameEvent)
 
 playerGroup = GroupSingle(player)
-projectileGroup = Group(projectile)
+projectileGroup = Group()
 
 # Joystick initialization
 # TODO Move joystick stuff to a input management file
@@ -71,7 +62,6 @@ print("Has Joystick: " + str(hasJoystick))
 # -------- Main Program Loop -----------
 while running:
 
-<<<<<<< HEAD
     # TODO Move input event stuff to input management file
     # Do we even need to use this? All input will be coming from joystick stuff
     for event in pygame.event.get():
@@ -79,21 +69,11 @@ while running:
             if event.key == pygame.K_ESCAPE:
                 running = False
             if event.key == pygame.K_SPACE:
-                player.animController.setAnimStrip(1, 6, 18.0)
+				player.animController.playingAnimationIndex = 1
         projectile = Projectile()
         # I dont think we need x position, player only moves along y axis
         projectile.rect.x = player.rect.x
         projectile.rect.y = player.rect.y
-=======
-	# TODO Move input event stuff to input management file
-	# Do we even need to use this? All input will be coming from joystick stuff
-	for event in pygame.event.get():
-		if event.type == pygame.KEYDOWN:
-			if event.key == pygame.K_ESCAPE:
-				running = False
-			if event.key == pygame.K_SPACE:
-				player.animController.playingAnimationIndex = 1
->>>>>>> origin/master
 
     screenSurface.fill(pi_globals.BLACK)
 

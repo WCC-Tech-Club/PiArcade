@@ -5,21 +5,9 @@ from animation import Animation
 from animation import AnimationController
 
 
-<<<<<<< HEAD
 class Player(Sprite):
-    __animController = None
-=======
-	def __init__(self, spriteSheet, collisionRadius, position):
-		Sprite.__init__(self)
-		self.image = spriteSheet[0]
-		self.rect = self.image.get_rect()
-		self.radius = collisionRadius
-		self.position = position
-		self.__animController = AnimationController(self, [Animation([spriteSheet[0]], 0.0), Animation([spriteSheet[1], spriteSheet[2], spriteSheet[3], spriteSheet[4], spriteSheet[5], spriteSheet[6]], 18.0)])
 
-	def getAnimController(self):
-		return self.__animController
->>>>>>> origin/master
+    __animController = None
 
     position = Vector2(0, 0)
 
@@ -29,7 +17,7 @@ class Player(Sprite):
         self.rect = self.image.get_rect()
         self.radius = collisionRadius
         self.position = position
-        self.__animController = AnimationController(self, spriteSheet)
+        self.__animController = AnimationController(self, [Animation([spriteSheet[0]], 0.0), Animation([spriteSheet[1], spriteSheet[2], spriteSheet[3], spriteSheet[4], spriteSheet[5], spriteSheet[6]], 18.0)])
 
     def getAnimController(self):
         return self.__animController
@@ -51,4 +39,5 @@ class Player(Sprite):
 
     def Shoot(self):
         # Change center to top half
-        bullet_origin = self.rect.center + 5
+        # bullet_origin = self.rect.center + 5
+        pass
