@@ -2,19 +2,19 @@ import pi_globals
 
 class Animation:
 
-	__frames = []              # Sprites that make up the animation
+	__sprites = []              # Sprites that make up the animation
 	__framerate = 30.0          # Framerate (number of sprites to cycle through per second)
 	__frameEvents = dict()           # events to fire when specific frames are passed
 
 	def __init__(self, sprites, framerate = 30.0):
-		self.__frames = sprites
+		self.__sprites = sprites
 		self.framerate = framerate
 
 	def __getFrameCount(self):
-		return len(self.__frames)
+		return len(self.__sprites)
 
 	def getSprite(self, frame):
-		return self.__frames[frame];
+		return self.__sprites[frame];
 
 	def __getFramerate(self):
 		return self.__framerate
