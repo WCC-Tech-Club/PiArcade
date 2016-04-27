@@ -1,83 +1,132 @@
 import pi_globals
 
+class Animation:
+
+	__frames = []              # Sprites that make up the animation
+	__framerate = 30.0          # Framerate (number of sprites to cycle through per second)
+	__frameEvents = dict()           # events to fire when specific frames are passed
+
+	def __init__(self, sprites, framerate = 30.0):
+		self.__frames = sprites
+		self.framerate = framerate
+
+	def __getFrameCount(self):
+		return len(self.__frames)
+
+	def getSprite(self, frame):
+		return self.__frames[frame];
+
+	def __getFramerate(self):
+		return self.__framerate
+
+	def __setFramerate(self, framerate):
+		if framerate < 0:
+			framerate = 0
+
+		self.__framerate = framerate
+
+	def setFrameEvent(self, frame, event):
+		self.__frameEvents[frame] = event
+
+	def hasEventAtFrame(self, frame):
+		return frame in self.__frameEvents
+
+	def getEventAtFrame(self, frame):
+		return self.__frameEvents[frame]
+
+	def removeFrameEvent(self, frame):
+		del self.__frameEvents[frame]
+
+	frameCount = property(__getFrameCount)
+
+	framerate = property(__getFramerate, __setFramerate)
+
+
 class AnimationController:
 
-	__target = None             # The target sprite (pygame sprite object) that is to be animated
+	__target = None                 # The target sprite (pygame sprite object) that is to be animated
+	__animations = []               # A list of animations this controller manages
+	__playingAnimationIndex = 0     # The current animation playing
 
-	__spritesheet = None        # Array of surfaces (traditional sprites) to act as animation frames
-	__spriteIndex = 0           # Current sprite from the sprite sheet applied to the target
+	__animTime = 0.0                # Frame time of current animation strip. Controlled by framerate.
 
-	__animTime = 0.0            # Frame time of current animation strip. Controlled by framerate.
-	__animStart = 0             # The start index from the sprite sheet for the animation strip
-	__animLength = 1            # The length of the strip to animate
+	__isEnabled = False             # boolean flag to control if the controller should animate
 
-	animFramerate = 30.0        # The number of frames (sprites from the sprite sheet) to cycle through per second
-	enabled = False             # boolean flag to control if the controller should animate
-
-	__frameTriggers = dict()	# Functions to tall when passing a specific sprite index frame
-
-	def __init__(self, target, spriteSheet, animFramerate = 30.0):
+	def __init__(self, target, animations, startAnimation = 0):
 		self.__target = target
-		self.__spritesheet = spriteSheet
-		self.setAnimStrip(0, len(spriteSheet), animFramerate)
+		self.__animations = animations
+		self.playingAnimationIndex = startAnimation
 
-	def getSpriteIndex(self):
-		return self.__spriteIndex
+	def __hasTarget(self):
+		return self.__target is not None
 
-	def setSpriteIndex(self, spriteIndex):
-		self.__spriteIndex = spriteIndex
-		self.__target.image = self.__spritesheet[spriteIndex]
+	def __getTarget(self):
+		return self.__target
 
-	spriteIndex = property(getSpriteIndex, setSpriteIndex)
+	def __getAnimationCount(self):
+		return len(self.__animations)
 
-	def getAnimStart(self):
-		return self.__animStart
+	def getAnimation(self, index):
+		return self.__animations[index]
 
-	animStart = property(getAnimStart)
+	def __getPlayingAnimationIndex(self):
+		return self.__playingAnimationIndex
 
-	def getAnimLength(self):
-		return self.__animLength
+	def __setPlayingAnimationIndex(self, index):
+		if index == self.__playingAnimationIndex:
+			pass
 
-	animLength = property(getAnimLength)
-
-	def setTrigger(self, spriteIndex, trigger):
-		self.__frameTriggers[spriteIndex] = trigger;
-
-	def removeTrigger(self, spriteIndex):
-		del self.__frameTriggers[spriteIndex]
-
-	def setAnimStrip(self, animStart, animLength, animFrameRate = 30.0):
-		self.__animStart = animStart
-		self.__animLength = animLength
+		self.__playingAnimationIndex = index
+		self.__target.image = self.playingAnimation.getSprite(0)
 		self.__animTime = 0.0
-		self.animFramerate = animFrameRate
+
+	def __getPlayingAnimation(self):
+		return self.getAnimation(self.__playingAnimationIndex)
+
+	def __getIsEnabled(self):
+		return self.__isEnabled
+
+	def __setIsEnabled(self, isEnabled):
+		self.__isEnabled = isEnabled
+
+	hasTarget = property(__hasTarget)
+
+	target = property(__getTarget)
+
+	animationCount = property(__getAnimationCount)
+
+	playingAnimationIndex = property(__getPlayingAnimationIndex, __setPlayingAnimationIndex)
+
+	playingAnimation = property(__getPlayingAnimation)
+
+	isEnabled = property(__getIsEnabled, __setIsEnabled)
 
 	def update(self):
-		if self.enabled:
+
+		if self.isEnabled and self.hasTarget and self.playingAnimation.framerate > 0.0:
 
 			lastFrameTime = int(self.__animTime)
-			self.__animTime += self.animFramerate * pi_globals.deltaTime
+			self.__animTime += self.playingAnimation.framerate * pi_globals.deltaTime
 			currentFrameTime = int(self.__animTime)
 
-			if currentFrameTime != lastFrameTime:
+			if currentFrameTime > lastFrameTime:
 
-				spriteIndex = 0
-				frameTriggers = []
+				frame = 0
+				frameEvents = []
 
-				for i in range(lastFrameTime + 1, currentFrameTime + 1):
+				for frameTime in range(lastFrameTime + 1, currentFrameTime + 1):
 
-					frameStep = i % self.animLength
+					frame = frameTime % self.playingAnimation.frameCount
 
 					# If the animation time is negative, this makes the index valid to use
-					if frameStep < 0:
-						frameStep += self.animLength
+					if frame < 0:
+						frame += self.playingAnimation.frameCount
 
-					spriteIndex = self.animStart + frameStep
+					if self.playingAnimation.hasEventAtFrame(frame):
+						frameEvents.append(self.playingAnimation.getEventAtFrame(frame))
 
-					if spriteIndex in self.__frameTriggers:
-						frameTriggers.append(self.__frameTriggers[spriteIndex])
+				self.target.image = self.playingAnimation.getSprite(frame)
 
-				self.spriteIndex = spriteIndex
+				for frameEvent in frameEvents:
+					frameEvent(self.__target)
 
-				for trigger in frameTriggers:
-					trigger(self.__target)

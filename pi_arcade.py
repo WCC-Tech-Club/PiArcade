@@ -21,8 +21,8 @@ from player import Player
 pygame.init()
 
 # Set the display mode to full screen with monitor resolution
-# screenSurface = pygame.display.set_mode((800, 600))
-screenSurface = pygame.display.set_mode((0, 0), pygame.FULLSCREEN)
+screenSurface = pygame.display.set_mode((800, 600))
+# screenSurface = pygame.display.set_mode((0, 0), pygame.FULLSCREEN)
 pi_globals.screenSize = screenSurface.get_size()
 
 # Game loop clock
@@ -33,13 +33,12 @@ running = True
 
 # Sprites & Sprite Groups
 player = Player(SpriteSheet("resources/img/player.png").images_at(util.gen_sprite_list(7, 7, 128, 192, 0), [255, 0, 255]), 64, Vector2(128, pi_globals.screenSize[1] / 2.0))
-player.animController.enabled = True
+player.animController.isEnabled = True
 
-def endTrowTrigger(targetPlayer):
-	targetPlayer.animController.setAnimStrip(0, 1, 18.0)
+def endThrowFrameEvent(targetPlayer):
+	targetPlayer.animController.playingAnimationIndex = 0
 
-player.animController.setAnimStrip(0, 1, 18.0)
-player.animController.setTrigger(6, endTrowTrigger)
+player.animController.getAnimation(1).setFrameEvent(5, endThrowFrameEvent)
 
 playerGroup = GroupSingle(player)
 projectileGroup = Group()
@@ -67,7 +66,7 @@ while running:
 			if event.key == pygame.K_ESCAPE:
 				running = False
 			if event.key == pygame.K_SPACE:
-				player.animController.setAnimStrip(1, 6, 18.0)
+				player.animController.playingAnimationIndex = 1
 
 	screenSurface.fill(pi_globals.BLACK)
 
