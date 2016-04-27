@@ -69,11 +69,11 @@ while running:
             if event.key == pygame.K_ESCAPE:
                 running = False
             if event.key == pygame.K_SPACE:
-				player.animController.playingAnimationIndex = 1
-        projectile = Projectile()
+                player.animController.playingAnimationIndex = 1
+        # projectile = Projectile()
         # I dont think we need x position, player only moves along y axis
-        projectile.rect.x = player.rect.x
-        projectile.rect.y = player.rect.y
+        # projectile.rect.x = player.rect.x
+        # projectile.rect.y = player.rect.y
 
     screenSurface.fill(pi_globals.BLACK)
 
