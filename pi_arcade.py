@@ -22,8 +22,8 @@ from player import Player
 pygame.init()
 
 # Set the display mode to full screen with monitor resolution
-# screenSurface = pygame.display.set_mode((800, 600))
-screenSurface = pygame.display.set_mode((0, 0), pygame.FULLSCREEN)
+screenSurface = pygame.display.set_mode((800, 600))
+# screenSurface = pygame.display.set_mode((0, 0), pygame.FULLSCREEN)
 pi_globals.screenSize = screenSurface.get_size()
 
 # Game loop clock
@@ -33,6 +33,7 @@ clock = Clock()
 running = True
 
 # Sprites & Sprite Groups
+<<<<<<< HEAD
 player = Player(SpriteSheet("resources/img/player.png").images_at(util.gen_sprite_list(7, 7, 128, 192, 0), [255, 0, 255]), 64,Vector2(128, pi_globals.screenSize[1] / 2.0))
 player.animController.enabled = True
 #projectile = Projectile(SpriteSheet("resources/img/paper_animation.png").image_at(util.gen_sprite_list(26, 10, 50, 50, 0), [255, 255, 255]), 25, player.position, Vector2(25, 25), 0.0)
@@ -41,9 +42,15 @@ player.animController.enabled = True
 def endTrowTrigger(targetPlayer):
     targetPlayer.animController.setAnimStrip(0, 1, 18.0)
 
+=======
+player = Player(SpriteSheet("resources/img/player.png").images_at(util.gen_sprite_list(7, 7, 128, 192, 0), [255, 0, 255]), 64, Vector2(128, pi_globals.screenSize[1] / 2.0))
+player.animController.isEnabled = True
 
-player.animController.setAnimStrip(0, 1, 18.0)
-player.animController.setTrigger(6, endTrowTrigger)
+def endThrowFrameEvent(targetPlayer):
+	targetPlayer.animController.playingAnimationIndex = 0
+>>>>>>> origin/master
+
+player.animController.getAnimation(1).setFrameEvent(5, endThrowFrameEvent)
 
 playerGroup = GroupSingle(player)
 projectileGroup = Group(projectile)
@@ -64,6 +71,7 @@ print("Has Joystick: " + str(hasJoystick))
 # -------- Main Program Loop -----------
 while running:
 
+<<<<<<< HEAD
     # TODO Move input event stuff to input management file
     # Do we even need to use this? All input will be coming from joystick stuff
     for event in pygame.event.get():
@@ -76,6 +84,16 @@ while running:
         # I dont think we need x position, player only moves along y axis
         projectile.rect.x = player.rect.x
         projectile.rect.y = player.rect.y
+=======
+	# TODO Move input event stuff to input management file
+	# Do we even need to use this? All input will be coming from joystick stuff
+	for event in pygame.event.get():
+		if event.type == pygame.KEYDOWN:
+			if event.key == pygame.K_ESCAPE:
+				running = False
+			if event.key == pygame.K_SPACE:
+				player.animController.playingAnimationIndex = 1
+>>>>>>> origin/master
 
     screenSurface.fill(pi_globals.BLACK)
 
