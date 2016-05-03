@@ -33,13 +33,18 @@ clock = Clock()
 running = True
 
 # Sprites & Sprite Groups
-player = Player(SpriteSheet("resources/img/player.png").images_at(util.gen_sprite_list(7, 7, 128, 192, 0), [255, 0, 255]), 64,Vector2(128, pi_globals.screenSize[1] / 2.0))
+player = Player(
+	SpriteSheet("resources/img/player.png").images_at(util.gen_sprite_list(7, 7, 128, 192, 0), [255, 0, 255]), 64,
+	Vector2(128, pi_globals.screenSize[1] / 2.0))
 player.animController.isEnabled = True
-#projectile = Projectile(SpriteSheet("resources/img/paper_animation.png").image_at(util.gen_sprite_list(26, 10, 50, 50, 0), [255, 255, 255]), 25, player.position, Vector2(25, 25), 0.0)
+
+
+# projectile = Projectile(SpriteSheet("resources/img/paper_animation.png").image_at(util.gen_sprite_list(26, 10, 50, 50, 0), [255, 255, 255]), 25, player.position, Vector2(25, 25), 0.0)
 
 
 def endThrowFrameEvent(targetPlayer):
 	targetPlayer.animController.playingAnimationIndex = 0
+
 
 player.animController.getAnimation(1).setFrameEvent(5, endThrowFrameEvent)
 
@@ -53,53 +58,54 @@ hasJoystick = False
 joystick = None
 
 if pygame.joystick.get_count() > 0:
-    joystick = pygame.joystick.Joystick(0)
-    joystick.init()
-    hasJoystick = joystick.get_numaxes() >= 2
+	joystick = pygame.joystick.Joystick(0)
+	joystick.init()
+	hasJoystick = joystick.get_numaxes() >= 2
 
 print("Has Joystick: " + str(hasJoystick))
 
 # -------- Main Program Loop -----------
 while running:
 
-    # TODO Move input event stuff to input management file
-    # Do we even need to use this? All input will be coming from joystick stuff
-    for event in pygame.event.get():
-        if event.type == pygame.KEYDOWN:
-            if event.key == pygame.K_ESCAPE:
-                running = False
-            if event.key == pygame.K_SPACE:
-                player.animController.playingAnimationIndex = 1
-        # projectile = Projectile()
-        # I dont think we need x position, player only moves along y axis
-        # projectile.rect.x = player.rect.x
-        # projectile.rect.y = player.rect.y
+	# TODO Move input event stuff to input management file
+	# Do we even need to use this? All input will be coming from joystick stuff
+	for event in pygame.event.get():
+		if event.type == pygame.QUIT:
+			running = False
+		if event.type == pygame.KEYDOWN:
+			if event.key == pygame.K_ESCAPE:
+				running = False
+			if event.key == pygame.K_SPACE:
+				player.animController.playingAnimationIndex = 1
+			# projectile = Projectile()
+			# I dont think we need x position, player only moves along y axis
+			# projectile.rect.x = player.rect.x
+			# projectile.rect.y = player.rect.y
 
-    screenSurface.fill(pi_globals.BLACK)
+	screenSurface.fill(pi_globals.BLACK)
 
-    position = Vector2(0, 0)
-    pressedKeys = pygame.key.get_pressed()
+	position = Vector2(0, 0)
+	pressedKeys = pygame.key.get_pressed()
 
-    if pressedKeys[pygame.K_w] or pressedKeys[pygame.K_UP]:
-        position.y -= 1
+	if pressedKeys[pygame.K_w] or pressedKeys[pygame.K_UP]:
+		position.y -= 1
 
-    if pressedKeys[pygame.K_s] or pressedKeys[pygame.K_DOWN]:
-        position.y += 1
+	if pressedKeys[pygame.K_s] or pressedKeys[pygame.K_DOWN]:
+		position.y += 1
 
-    # Hard Coded Speed
-    player.position += position * 10;
+	# Hard Coded Speed
+	player.position += position * 10;
 
-    playerGroup.update()
+	playerGroup.update()
 
-    playerGroup.draw(screenSurface)
+	playerGroup.draw(screenSurface)
 
-    # Update screen with what has been drawn
-    display.flip()
+	# Update screen with what has been drawn
+	display.flip()
 
-    # Game loop clock tick and delta time calculation
-    pi_globals.deltaTime = clock.tick_busy_loop(pi_globals.FRAMERATE) / 1000.0
-
-# Close the window and quit.
+	# Game loop clock tick and delta time calculation
+	pi_globals.deltaTime = clock.tick_busy_loop(pi_globals.FRAMERATE) / 1000.0  # Close the window and quit.
+	
 pygame.quit()
 
 ######## Refrence Player ########
